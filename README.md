@@ -44,10 +44,11 @@ The Remote Odor Transmission System (ROTS) implements digital olfaction technolo
 - **Communication**: WiFi with TCP/UDP protocols
 
 ### Receiver Components
-- **MCU**: Raspberry Pi 4B (4GB RAM)
+- **MCU**: STM32F407VET6 (168MHz, 512KB Flash, 192KB SRAM)
+- **Communication**: ESP8266 WiFi module (UART)
 - **Actuators**: 5x micro peristaltic pumps + solenoid valves
 - **Mixing System**: 3D-printed mixing chamber
-- **Display**: 0.96" OLED screen
+- **Display**: 0.96" OLED screen (SSD1306)
 
 
 ## AI Model Development
@@ -77,7 +78,9 @@ The Remote Odor Transmission System (ROTS) implements digital olfaction technolo
 ### Receiver Hardware
 | Component | Model | Quantity |
 |-----------|-------|----------|
-| MCU | Raspberry Pi 4B | 1 |
+| MCU | STM32F407VET6 | 1 |
+| WiFi Module | ESP8266 | 1 |
+| Storage | SPI Flash 16MB | 1 |
 | Pumps | Micro Peristaltic | 5 |
 | Valves | Solenoid 12V | 5 |
 | Mixing Chamber | 3D Printed | 1 |
@@ -90,8 +93,8 @@ ROTS/
 │   ├── src/               # Source code
 │   ├── lib/               # Libraries
 │   └── models/            # AI models
-├── receiver/              # Raspberry Pi software
-│   ├── src/               # Python source
+├── receiver/              # STM32 software
+│   ├── src/               # C/C++ source
 │   ├── config/            # Configuration files
 │   └── recipes/           # Odor recipes database
 ├── docs/                  # Documentation
@@ -116,25 +119,25 @@ ROTS/
 
 ## Implementation Plan
 
-### Phase 1: Hardware Prototype (4-6 weeks)
+### Phase 1: Hardware Prototype
 - ESP32 sensor array development and testing
 - Basic gas sensor calibration and data collection
 - Raspberry Pi actuator control system
 - Initial communication protocol implementation
 
-### Phase 2: AI Model Development (6-8 weeks)
+### Phase 2: AI Model Development 
 - Data collection from controlled environments
 - Feature engineering and model training
 - TensorFlow Lite model optimization for ESP32
 - Real-time inference testing and validation
 
-### Phase 3: System Integration (4-6 weeks)
+### Phase 3: System Integration
 - End-to-end system integration
 - Performance optimization and tuning
 - User interface development
 - Comprehensive testing and validation
 
-### Phase 4: Advanced Features (4-6 weeks)
+### Phase 4: Advanced Features
 - Multi-odor recognition capabilities
 - Advanced mixing algorithms
 - Remote monitoring and control
@@ -152,3 +155,5 @@ ROTS/
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
