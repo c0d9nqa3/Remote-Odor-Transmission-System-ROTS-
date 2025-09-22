@@ -152,10 +152,3 @@ ROTS/
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- TensorFlow Lite Micro team for edge AI framework
-- Espressif for ESP32 platform
-- Raspberry Pi Foundation for hardware platform
-- Open source community for various libraries
