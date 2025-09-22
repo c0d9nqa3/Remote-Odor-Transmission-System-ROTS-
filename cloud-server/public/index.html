@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROTS 系统管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        .device-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .device-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .device-card.online {
+            border-left: 4px solid #4CAF50;
+        }
+        .device-card.offline {
+            border-left: 4px solid #f44336;
+        }
+        .device-card.error {
+            border-left: 4px solid #ff9800;
+        }
+        .command-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .logs {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-entry.error {
+            color: #f44336;
+        }
+        .log-entry.warning {
+            color: #ff9800;
+        }
+        .log-entry.info {
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ROTS 远程气味传输系统</h1>
+        
+        <!-- 设备状态 -->
+        <div class="section">
+            <h2>设备状态</h2>
+            <div class="device-list" id="deviceList">
+                <!-- 设备列表将在这里动态加载 -->
+            </div>
+            <button onclick="loadDevices()">刷新设备</button>
+        </div>
+        
+        <!-- 发送命令 -->
+        <div class="section">
+            <h2>发送气味命令</h2>
+            <div class="command-form">
+                <div class="form-group">
+                    <label>发送端设备:</label>
+                    <select id="senderSelect">
+                        <option value="">选择发送端...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>接收端设备:</label>
+                    <select id="receiverSelect">
+                        <option value="">选择接收端...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>气味类型:</label>
+                    <select id="odorType">
+                        <option value="coffee">咖啡</option>
+                        <option value="alcohol">酒精</option>
+                        <option value="lemon">柠檬</option>
+                        <option value="mint">薄荷</option>
+                        <option value="lavender">薰衣草</option>
+                        <option value="mixed">混合</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>强度 (0-100):</label>
+                    <input type="number" id="intensity" min="0" max="100" value="50">
+                </div>
+                <div class="form-group">
+                    <label>持续时间 (秒):</label>
+                    <input type="number" id="duration" min="1" max="300" value="30">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button onclick="sendCommand()">发送命令</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 系统日志 -->
+        <div class="section">
+            <h2>系统日志</h2>
+            <div class="logs" id="systemLogs">
+                <!-- 日志将在这里显示 -->
+            </div>
+            <button onclick="loadLogs()">刷新日志</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let devices = [];
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDevices();
+            loadLogs();
+            
+            // 每30秒自动刷新
+            setInterval(loadDevices, 30000);
+            setInterval(loadLogs, 30000);
+        });
+        
+        // 加载设备列表
+        async function loadDevices() {
+            try {
+                const response = await fetch('/api/devices');
+                devices = await response.json();
+                
+                displayDevices();
+                updateDeviceSelects();
+            } catch (error) {
+                console.error('加载设备失败:', error);
+            }
+        }
+        
+        // 显示设备列表
+        function displayDevices() {
+            const deviceList = document.getElementById('deviceList');
+            deviceList.innerHTML = '';
+            
+            devices.forEach(device => {
+                const deviceCard = document.createElement('div');
+                deviceCard.className = `device-card ${device.status}`;
+                
+                const statusText = {
+                    'online': '在线',
+                    'offline': '离线',
+                    'error': '错误'
+                }[device.status] || '未知';
+                
+                const lastSeen = new Date(device.last_seen).toLocaleString('zh-CN');
+                
+                deviceCard.innerHTML = `
+                    <h3>${device.device_id}</h3>
+                    <p><strong>类型:</strong> ${device.device_type === 'sender' ? '发送端' : '接收端'}</p>
+                    <p><strong>位置:</strong> ${device.location || '未知'}</p>
+                    <p><strong>状态:</strong> ${statusText}</p>
+                    <p><strong>最后在线:</strong> ${lastSeen}</p>
+                `;
+                
+                deviceList.appendChild(deviceCard);
+            });
+        }
+        
+        // 更新设备选择框
+        function updateDeviceSelects() {
+            const senderSelect = document.getElementById('senderSelect');
+            const receiverSelect = document.getElementById('receiverSelect');
+            
+            // 清空现有选项
+            senderSelect.innerHTML = '<option value="">选择发送端...</option>';
+            receiverSelect.innerHTML = '<option value="">选择接收端...</option>';
+            
+            // 添加设备选项
+            devices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.device_id;
+                option.textContent = `${device.device_id} (${device.location || '未知位置'})`;
+                
+                if (device.device_type === 'sender') {
+                    senderSelect.appendChild(option);
+                } else if (device.device_type === 'receiver') {
+                    receiverSelect.appendChild(option);
+                }
+            });
+        }
+        
+        // 发送命令
+        async function sendCommand() {
+            const senderId = document.getElementById('senderSelect').value;
+            const receiverId = document.getElementById('receiverSelect').value;
+            const odorType = document.getElementById('odorType').value;
+            const intensity = parseInt(document.getElementById('intensity').value);
+            const duration = parseInt(document.getElementById('duration').value);
+            
+            if (!senderId || !receiverId) {
+                alert('请选择发送端和接收端设备');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/commands/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sender_id: senderId,
+                        receiver_id: receiverId,
+                        odor_type: odorType,
+                        intensity: intensity,
+                        duration: duration
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('命令发送成功！');
+                    loadLogs(); // 刷新日志
+                } else {
+                    alert('命令发送失败: ' + result.error);
+                }
+            } catch (error) {
+                console.error('发送命令失败:', error);
+                alert('发送命令失败: ' + error.message);
+            }
+        }
+        
+        // 加载日志
+        async function loadLogs() {
+            try {
+                const response = await fetch('/api/devices/ROTS_RECEIVER_001/logs');
+                const logs = await response.json();
+                
+                displayLogs(logs);
+            } catch (error) {
+                console.error('加载日志失败:', error);
+            }
+        }
+        
+        // 显示日志
+        function displayLogs(logs) {
+            const logsContainer = document.getElementById('systemLogs');
+            logsContainer.innerHTML = '';
+            
+            logs.forEach(log => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${log.log_type}`;
+                
+                const timestamp = new Date(log.created_at).toLocaleString('zh-CN');
+                logEntry.textContent = `[${timestamp}] ${log.message}`;
+                
+                logsContainer.appendChild(logEntry);
+            });
+            
+            // 滚动到底部
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
