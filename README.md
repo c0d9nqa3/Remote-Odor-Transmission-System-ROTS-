@@ -23,19 +23,24 @@ The Remote Odor Transmission System (ROTS) implements digital olfaction technolo
 | Transmission Latency | <200ms |
 | Supported Odor Types | ≥5 categories |
 | Power Consumption | Sender: <5W, Receiver: <15W |
-| Operating Range | WiFi coverage area |
+| Operating Range | Global (via Internet) |
 
 ## System Architecture
 
 ```
-┌─────────────────┐    WiFi/Internet    ┌─────────────────┐
-│   Sender (ESP32)│───────────────────▶│ Receiver (STM32) │
-│                 │                     │                 │
-│  ├─Sensor Array │                     │  ├─Control Unit │
-│  ├─Edge AI      │                     │  ├─Odor Generator│
-│  └─Communication│◀───────────────────│  └─Status Display│
-└─────────────────┘                     └─────────────────┘
+┌─────────────────┐    WiFi/4G    ┌─────────────┐    WiFi/4G    ┌─────────────────┐
+│   Sender (ESP32)│──────────────▶│Cloud Server │◀──────────────│ Receiver (STM32)│
+│                 │               │             │               │                 │
+│  ├─Sensor Array │               │  ├─MQTT     │               │  ├─Control Unit │
+│  ├─Edge AI      │               │  ├─Database │               │  ├─Odor Generator│
+│  └─Communication│◀──────────────│  └─Web API  │──────────────▶│  └─Status Display│
+└─────────────────┘               └─────────────┘               └─────────────────┘
 ```
+
+### Communication Flow
+1. **Sender**: Detects odor → AI processing → Send to cloud
+2. **Cloud**: Store data → Route to receiver → Log activity
+3. **Receiver**: Receive command → Generate odor → Send status back
 
 ### Sender Components
 - **MCU**: ESP32-WROOM-32E (4MB Flash + PSRAM)
@@ -119,13 +124,13 @@ ROTS/
 
 ## Implementation Plan
 
-### Phase 1: Hardware Prototype
+### Phase 1: Hardware Prototype 
 - ESP32 sensor array development and testing
 - Basic gas sensor calibration and data collection
 - Raspberry Pi actuator control system
 - Initial communication protocol implementation
 
-### Phase 2: AI Model Development 
+### Phase 2: AI Model Development
 - Data collection from controlled environments
 - Feature engineering and model training
 - TensorFlow Lite model optimization for ESP32
@@ -155,5 +160,4 @@ ROTS/
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 
