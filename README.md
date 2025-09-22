@@ -29,7 +29,7 @@ The Remote Odor Transmission System (ROTS) implements digital olfaction technolo
 
 ```
 ┌─────────────────┐    WiFi/Internet    ┌─────────────────┐
-│   Sender (ESP32)│───────────────────▶│ Receiver (RPi4) │
+│   Sender (ESP32)│───────────────────▶│ Receiver (STM32) │
 │                 │                     │                 │
 │  ├─Sensor Array │                     │  ├─Control Unit │
 │  ├─Edge AI      │                     │  ├─Odor Generator│
