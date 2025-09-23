@@ -153,8 +153,15 @@ static float ROTS_SensorManager_ReadMQSensor(uint8_t pin, uint8_t sensor_id) {
     // 转换为电阻值 (假设RL=10kΩ)
     float resistance = (3.3f - calibrated_value) * 10000.0f / calibrated_value;
     
+    // 防止除零错误
+    if (resistance < 1.0f) resistance = 1.0f;
+    
     // 转换为气体浓度 (简化计算)
     float concentration = pow(10, (log10(resistance) - 2.0f) / 0.8f);
+    
+    // 限制浓度范围
+    if (concentration > 1000.0f) concentration = 1000.0f;
+    if (concentration < 0.1f) concentration = 0.1f;
     
     return concentration;
 }
