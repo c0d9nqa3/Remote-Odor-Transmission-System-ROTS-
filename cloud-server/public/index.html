@@ -114,48 +114,47 @@
     <div class="container">
         <h1>ROTS</h1>
         
-        <!-- 设备状态 -->
         <div class="section">
-            <h2>设备状态</h2>
+            <h2>Device status</h2>
             <div class="device-list" id="deviceList">
-                <!-- 设备列表将在这里动态加载 -->
+              
             </div>
-            <button onclick="loadDevices()">刷新设备</button>
+            <button onclick="loadDevices()">refresh device</button>
         </div>
         
-        <!-- 发送命令 -->
+
         <div class="section">
-            <h2>发送气味命令</h2>
+            <h2>Send odor command</h2>
             <div class="command-form">
                 <div class="form-group">
-                    <label>发送端设备:</label>
+                    <label>Sender device:</label>
                     <select id="senderSelect">
-                        <option value="">选择发送端...</option>
+                        <option value="">select sender...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>接收端设备:</label>
+                    <label>receiver device:</label>
                     <select id="receiverSelect">
-                        <option value="">选择接收端...</option>
+                        <option value="">Select recevier...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>气味类型:</label>
+                    <label>Smell type:</label>
                     <select id="odorType">
-                        <option value="coffee">咖啡</option>
-                        <option value="alcohol">酒精</option>
-                        <option value="lemon">柠檬</option>
-                        <option value="mint">薄荷</option>
-                        <option value="lavender">薰衣草</option>
-                        <option value="mixed">混合</option>
+                        <option value="coffee">Coffee</option>
+                        <option value="alcohol">Alcohol</option>
+                        <option value="lemon">Lemon</option>
+                        <option value="mint">Mint</option>
+                        <option value="lavender">Lavender</option>
+                        <option value="mixed">Mix</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>强度 (0-100):</label>
+                    <label>Strength(1-100):</label>
                     <input type="number" id="intensity" min="0" max="100" value="50">
                 </div>
                 <div class="form-group">
-                    <label>持续时间 (秒):</label>
+                    <label>Duration(s):</label>
                     <input type="number" id="duration" min="1" max="300" value="30">
                 </div>
                 <div class="form-group">
@@ -171,25 +170,23 @@
             <div class="logs" id="systemLogs">
                 <!-- 日志将在这里显示 -->
             </div>
-            <button onclick="loadLogs()">刷新日志</button>
+            <button onclick="loadLogs()">refresh log</button>
         </div>
     </div>
 
     <script>
-        // 全局变量
+        
         let devices = [];
         
-        // 页面加载时初始化
+        // init
         document.addEventListener('DOMContentLoaded', function() {
             loadDevices();
             loadLogs();
-            
-            // 每30秒自动刷新
             setInterval(loadDevices, 30000);
             setInterval(loadLogs, 30000);
         });
         
-        // 加载设备列表
+        // load device list
         async function loadDevices() {
             try {
                 const response = await fetch('/api/devices');
@@ -198,7 +195,7 @@
                 displayDevices();
                 updateDeviceSelects();
             } catch (error) {
-                console.error('加载设备失败:', error);
+                console.error('Failed to load device:', error);
             }
         }
         
@@ -221,26 +218,26 @@
                 
                 deviceCard.innerHTML = `
                     <h3>${device.device_id}</h3>
-                    <p><strong>类型:</strong> ${device.device_type === 'sender' ? '发送端' : '接收端'}</p>
-                    <p><strong>位置:</strong> ${device.location || '未知'}</p>
-                    <p><strong>状态:</strong> ${statusText}</p>
-                    <p><strong>最后在线:</strong> ${lastSeen}</p>
+                    <p><strong>type:</strong> ${device.device_type === 'sender' ? 'sender' : 'receiver'}</p>
+                    <p><strong>location:</strong> ${device.location || 'unknown'}</p>
+                    <p><strong>status:</strong> ${statusText}</p>
+                    <p><strong>last online:</strong> ${lastSeen}</p>
                 `;
                 
                 deviceList.appendChild(deviceCard);
             });
         }
         
-        // 更新设备选择框
+        // update device selector
         function updateDeviceSelects() {
             const senderSelect = document.getElementById('senderSelect');
             const receiverSelect = document.getElementById('receiverSelect');
             
-            // 清空现有选项
-            senderSelect.innerHTML = '<option value="">选择发送端...</option>';
-            receiverSelect.innerHTML = '<option value="">选择接收端...</option>';
+            // clear
+            senderSelect.innerHTML = '<option value="">select sender...</option>';
+            receiverSelect.innerHTML = '<option value="">select receiver...</option>';
             
-            // 添加设备选项
+            // add device
             devices.forEach(device => {
                 const option = document.createElement('option');
                 option.value = device.device_id;
@@ -254,7 +251,7 @@
             });
         }
         
-        // 发送命令
+        // send command
         async function sendCommand() {
             const senderId = document.getElementById('senderSelect').value;
             const receiverId = document.getElementById('receiverSelect').value;
@@ -263,7 +260,7 @@
             const duration = parseInt(document.getElementById('duration').value);
             
             if (!senderId || !receiverId) {
-                alert('请选择发送端和接收端设备');
+                alert('Select receiver and sender device');
                 return;
             }
             
@@ -285,14 +282,14 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    alert('命令发送成功！');
-                    loadLogs(); // 刷新日志
+                    alert('Successfully to send command！');
+                    loadLogs(); 
                 } else {
-                    alert('命令发送失败: ' + result.error);
+                    alert('Failed to send command: ' + result.error);
                 }
             } catch (error) {
-                console.error('发送命令失败:', error);
-                alert('发送命令失败: ' + error.message);
+                console.error('Failed to send command:', error);
+                alert('Failed to send command: ' + error.message);
             }
         }
         
@@ -304,11 +301,11 @@
                 
                 displayLogs(logs);
             } catch (error) {
-                console.error('加载日志失败:', error);
+                console.error('Failed to load log:', error);
             }
         }
         
-        // 显示日志
+        // log
         function displayLogs(logs) {
             const logsContainer = document.getElementById('systemLogs');
             logsContainer.innerHTML = '';
@@ -323,10 +320,11 @@
                 logsContainer.appendChild(logEntry);
             });
             
-            // 滚动到底部
+           
             logsContainer.scrollTop = logsContainer.scrollHeight;
         }
     </script>
 </body>
 </html>
+
 
