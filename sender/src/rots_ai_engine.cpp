@@ -182,13 +182,43 @@ static float ROTS_AIEngine_CalculateConfidence(ROTS_OdorType_t odor_type) {
 
 // 加载模型权重
 static void ROTS_AIEngine_LoadModel(void) {
-    // 这里应该从Flash或SD卡加载训练好的模型
-    // 暂时使用随机权重
-    for (int i = 0; i < ROTS_AI_MODEL_SIZE; i++) {
-        model_weights[i] = (random(-100, 100) / 100.0f);
-    }
+    // 使用预定义的简单权重，模拟训练好的模型
+    // 这些权重是基于经验设计的，用于演示
+    float demo_weights[ROTS_AI_MODEL_SIZE] = {
+        // Coffee weights (sensor 0-7, env 8-10, cross 11-14)
+        0.8f, 0.2f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f,  // MQ sensors
+        0.3f, 0.2f, 0.1f,  // Environment
+        0.1f, 0.1f, 0.1f, 0.1f,  // Cross features
+        
+        // Alcohol weights
+        0.1f, 0.8f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f,
+        0.2f, 0.3f, 0.1f,
+        0.1f, 0.1f, 0.1f, 0.1f,
+        
+        // Lemon weights
+        0.1f, 0.1f, 0.8f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f,
+        0.2f, 0.2f, 0.1f,
+        0.1f, 0.1f, 0.1f, 0.1f,
+        
+        // Mint weights
+        0.1f, 0.1f, 0.1f, 0.8f, 0.1f, 0.1f, 0.1f, 0.1f,
+        0.2f, 0.2f, 0.1f,
+        0.1f, 0.1f, 0.1f, 0.1f,
+        
+        // Lavender weights
+        0.1f, 0.1f, 0.1f, 0.1f, 0.8f, 0.1f, 0.1f, 0.1f,
+        0.2f, 0.2f, 0.1f,
+        0.1f, 0.1f, 0.1f, 0.1f,
+        
+        // Mixed weights
+        0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f,
+        0.2f, 0.2f, 0.1f,
+        0.2f, 0.2f, 0.2f, 0.2f
+    };
     
-    DEBUG_INFO("Model weights loaded\r\n");
+    memcpy(model_weights, demo_weights, sizeof(model_weights));
+    
+    DEBUG_INFO("Demo model weights loaded\r\n");
 }
 
 // 获取AI状态
